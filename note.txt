@@ -1,0 +1,3 @@
+=============== 27 July 2025 =================
+ALTER TABLE `tbl_lcpurchasemaster` ADD `freight_qty` INT NOT NULL DEFAULT '0' AFTER `PurchaseMaster_Freight`, ADD `currency_rate` INT NOT NULL DEFAULT '0' AFTER `freight_qty`, ADD `currency_name` VARCHAR(175) NULL DEFAULT NULL AFTER `currency_rate`;
+ 
