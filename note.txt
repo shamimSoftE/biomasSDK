@@ -1,3 +1,13 @@
-=============== 27 July 2025 =================
+======================= 27 July 2025 =================
 ALTER TABLE `tbl_lcpurchasemaster` ADD `freight_qty` INT NOT NULL DEFAULT '0' AFTER `PurchaseMaster_Freight`, ADD `currency_rate` INT NOT NULL DEFAULT '0' AFTER `freight_qty`, ADD `currency_name` VARCHAR(175) NULL DEFAULT NULL AFTER `currency_rate`;
- 
+
+======================= 29 July 2025 ==============
+ALTER TABLE `tbl_cbm_costing` CHANGE `Per_CBM` `Per_CBM` FLOAT NOT NULL DEFAULT '0.00', CHANGE `Per_Ctn` `Per_Ctn` FLOAT NOT NULL DEFAULT '0.00', CHANGE `Total_Ctn` `Total_Ctn` FLOAT NOT NULL DEFAULT '0.00', CHANGE `LC_Cost` `LC_Cost` FLOAT NOT NULL DEFAULT '0.00', CHANGE `CBM_Cost` `CBM_Cost` FLOAT NOT NULL DEFAULT '0.00', CHANGE `Per_CBM_Cost` `Per_CBM_Cost` FLOAT NOT NULL DEFAULT '0.00', CHANGE `Per_Pcs_Cost` `Per_Pcs_Cost` FLOAT NOT NULL DEFAULT '0.00';
+
+ALTER TABLE `tbl_cbm_costing` ADD `expense_coast` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `Per_Pcs_Cost`, ADD `product_coast` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `expense_coast`, ADD `product_value` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `product_coast`, ADD `total_expense` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `product_value`, ADD `total_value` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `total_expense
+
+
+
+
+
+

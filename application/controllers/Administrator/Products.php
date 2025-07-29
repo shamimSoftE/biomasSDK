@@ -245,7 +245,7 @@ class Products extends CI_Controller
         if (isset($data->brandId) && $data->brandId != null) {
             $clauses .= " and p.brand = '$data->brandId'";
         }
-// PurchaseMaster_SlNo
+        // PurchaseMaster_SlNo
         $stock = $this->db->query("
             select
                 p.*,

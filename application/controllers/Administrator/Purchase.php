@@ -81,7 +81,7 @@ class Purchase extends CI_Controller
 
         $clauses = "";
         $limit = "";
-        $status = "a";
+        // $status = "a";
         if (isset($data->status) && $data->status != '') {
             $status = $data->status;
         }
@@ -101,7 +101,7 @@ class Purchase extends CI_Controller
         }
 
         $purchaseIdClause = "";
-        if (isset($data->purchaseId) && $data->purchaseId != null) {
+        if (isset($data->purchaseId) && $data->purchaseId != null) { 
             $purchaseIdClause = " and pm.PurchaseMaster_SlNo = '$data->purchaseId'";
 
             $res['purchaseDetails'] = $this->db->query("
@@ -114,9 +114,9 @@ class Purchase extends CI_Controller
                     pc.ProductCategory_Name,
                     u.Unit_Name
                 from tbl_purchasedetails pd 
-                join tbl_product p on p.Product_SlNo = pd.Product_IDNo
+                left join tbl_product p on p.Product_SlNo = pd.Product_IDNo
                 left join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
-                join tbl_unit u on u.Unit_SlNo = p.Unit_ID
+                left join tbl_unit u on u.Unit_SlNo = p.Unit_ID
                 where pd.PurchaseMaster_IDNo = '$data->purchaseId'
                 and pd.status != 'd'
             ")->result();

@@ -539,6 +539,7 @@ $route['update_lc_purchase'] = 'Administrator/LcPurchase/updatePurchase';
 $route['get_lc_purchasedetails'] = 'Administrator/LcPurchase/getPurchaseDetails';
 $route['lc_purchaseRecord'] = 'Administrator/LcPurchase/lc_purchase_record';
 $route['get_lc_purchase_record'] = 'Administrator/LcPurchase/getPurchaseRecord';
+$route['get_pending_lc_purchase_record'] = 'Administrator/LcPurchase/getPendingPurchaseRecord';
 $route['delete_lc_purchase'] = 'Administrator/LcPurchase/deletePurchase';
 $route['approve_lc_purchase'] = 'Administrator/LcPurchase/approveLcPurchase';
 

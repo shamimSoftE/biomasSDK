@@ -132,13 +132,13 @@
 						</div>
 
 						<div class="form-group">
-							<label class="col-xs-4 control-label no-padding-right"> Bank </label>
+							<label class="col-xs-4 control-label no-padding-right">Loan Account </label>
 							<div class="col-xs-8" style="display: flex;align-items:center;margin-bottom:5px;">
 								<div style="width: 86%;">
 									<v-select v-bind:options="banks" style="margin: 0;" v-model="selectedBank" placeholder="Select Bank"  label="display_name"></v-select>
 								</div>
 								<div style="width: 13%;margin-left:2px;">
-									<a href="<?= base_url('bank_accounts') ?>" class="add-button" target="_blank" title="Add New Supplier"><i class="fa fa-plus" aria-hidden="true"></i></a>
+									<a href="<?= base_url('loan_accounts') ?>" class="add-button" target="_blank" title="Add New Supplier"><i class="fa fa-plus" aria-hidden="true"></i></a>
 								</div>
 							</div>
 						</div>

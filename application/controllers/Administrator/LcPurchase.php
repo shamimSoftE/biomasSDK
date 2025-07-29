@@ -105,6 +105,78 @@ class LcPurchase extends CI_Controller
         echo json_encode($purchases);
     }
 
+    public function getPendingPurchaseRecord()
+    {
+        $data = json_decode($this->input->raw_input_stream);
+        $branchId = $this->session->userdata("BRANCHid");
+        $clauses = "";
+        // $status = " and pd.status = 'p'";
+        // if (isset($data->status) && $data->status != '') {
+        //     $status = " and pd.status = '$data->status'"; ;
+        // }
+
+        if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
+            $clauses .= " and pm.PurchaseMaster_OrderDate between '$data->dateFrom' and '$data->dateTo'";
+        }
+
+        if (isset($data->userFullName) && $data->userFullName != '') {
+            $clauses .= " and pm.AddBy = '$data->userFullName'";
+        }
+
+        if (isset($data->supplierId) && $data->supplierId != '') {
+            $clauses .= " and pm.Supplier_SlNo = '$data->supplierId'";
+        }
+
+        $purchases = $this->db->query("
+            select 
+                pm.*,
+                s.Supplier_Code,
+                s.Supplier_Name,
+                s.Supplier_Mobile,
+                s.Supplier_Address,
+                br.Branch_name,
+                ua.User_Name as added_by,
+                concat_ws(' - ', ba.account_name, ba.account_number , ba.bank_name) as bank_text,
+                ud.User_Name as deleted_by
+            from tbl_lcpurchasemaster pm
+            left join tbl_supplier s on s.Supplier_SlNo = pm.Supplier_SlNo
+            left join tbl_bank_accounts ba on ba.account_id = pm.account_id
+            left join tbl_branch br on br.branch_id = pm.branch_id
+            left join tbl_user ua on ua.User_SlNo = pm.AddBy
+            left join tbl_user ud on ud.User_SlNo = pm.DeletedBy
+            where pm.branch_id = '$branchId'
+            and pm.status = 'p'
+            $clauses
+        ")->result();
+
+        foreach ($purchases as $purchase) {
+            $purchase->purchaseDetails = $this->db->query("
+                select 
+                    pd.*,
+                    p.Product_Name,
+                    pc.ProductCategory_Name
+                from tbl_lcpurchasedetails pd
+                join tbl_product p on p.Product_SlNo = pd.Product_IDNo
+                left join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
+                where pd.PurchaseMaster_IDNo = ?
+                and pd.status = 'p'
+            ", $purchase->lc_purchase_master_id)->result();
+        }
+        foreach ($purchases as $item) {
+            $item->expDetails = $this->db->query("
+                select
+                    pd.*,
+                    pd.id as eid,
+                    exp.name
+                from tbl_lcpurchaseexpense pd 
+                left join tbl_lc_expense exp on exp.id = pd.exp_id
+                where pd.lc_purchase_id = '$item->lc_purchase_master_id'
+                and pd.status != 'd'
+            ")->result();
+        }
+        echo json_encode($purchases);
+    }
+
     public function getLcPurchases()
     {
         $data = json_decode($this->input->raw_input_stream);
@@ -259,7 +331,7 @@ class LcPurchase extends CI_Controller
     }
 
     /*Delete Purchase Record*/
-    public function  deletePurchase()
+    public function deletePurchase()
     {
         $res = ['success' => false, 'message' => ''];
         try {
@@ -454,14 +526,14 @@ class LcPurchase extends CI_Controller
                     'PurchaseMaster_IDNo'           => $purchaseId,
                     'Product_IDNo'                  => $product->productId,
                     'unit_id'                       => $product->Unit_ID, 
-                    'category_id'                    => $product->categoryId,
+                    'category_id'                   => $product->categoryId,
                     'PurchaseDetails_TotalQuantity' => $product->quantity,
                     'PurchaseDetails_Rate'          => $product->purchaseRate,
                     'PurchaseDetails_TotalAmount'   => $product->total,
                     'currency_name'                 => $product->currencyName,
                     'currency_value'                => $product->totalForeignAmount,
                     'currency_rate'                 => $product->ProductCurrencyRate,
-                    'status'                        => 'a',
+                    'status'                        => 'p',
                     'AddBy'                         => $this->session->userdata("userId"),
                     'AddTime'                       => date('Y-m-d H:i:s'),
                     'last_update_ip'                => get_client_ip(),
@@ -549,7 +621,7 @@ class LcPurchase extends CI_Controller
                     'currency_name'                 => $product->currencyName,
                     'currency_value'                => $product->totalForeignAmount,
                     'currency_rate'                 => $product->ProductCurrencyRate,
-                    'status'                        => 'a',
+                    // 'status'                        => 'p',
                     'AddBy'                         => $this->session->userdata("userId"),
                     'AddTime'                       => date('Y-m-d H:i:s'),
                     'last_update_ip'                => get_client_ip(),
@@ -774,7 +846,8 @@ class LcPurchase extends CI_Controller
     function addCBMCosting()
     {
         $res = ['success' => false, 'message' => ''];
-        try {
+         try {
+            $this->db->trans_begin();
             $data = json_decode($this->input->raw_input_stream);
 
             $productCount = $this->db->query("select * from tbl_cbm_costing where Lcc_SlNo = ? and Item_Type = 'Product' and Product_SlNo = ?", [$data->Lcc_SlNo, $data->Product_SlNo])->num_rows();
@@ -783,16 +856,20 @@ class LcPurchase extends CI_Controller
                 $cbmCosting = array(
                     'Item_Type'     => $data->Item_Type,
                     'Product_SlNo'  => $data->Product_SlNo,
-                    // 'Material_IDNo' => $data->Material_IDNo,
                     'PurchaseMaster_SlNo' => isset($data->PurchaseMaster_SlNo) && $data->PurchaseMaster_SlNo != null ? $data->PurchaseMaster_SlNo : null,
-                    'Per_CBM'       => $data->Per_CBM,
-                    'Per_Ctn'       => $data->Per_Ctn,
-                    'Total_Ctn'     => $data->Total_Ctn,
-                    'LC_Cost'       => $data->LC_Cost,
-                    'CBM_Cost'      => $data->CBM_Cost,
-                    'Per_CBM_Cost'  => $data->Per_CBM_Cost,
+                    // 'Per_CBM'       => $data->Per_CBM,
+                    // 'Per_Ctn'       => $data->Per_Ctn,
+                    // 'Total_Ctn'     => $data->Total_Ctn,
+                    // 'LC_Cost'       => $data->LC_Cost,
+                    // 'CBM_Cost'      => $data->CBM_Cost,
+                    // 'Per_CBM_Cost'  => $data->Per_CBM_Cost,
+                    // 'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
                     'Quantity'      => $data->Quantity,
-                    'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
+                    'expense_coast' => $data->expense_coast,
+                    'product_coast' => $data->product_coast,
+                    'product_value' => $data->product_value,
+                    'total_expense' => $data->total_expense,
+                    'total_value'   => $data->total_value,
                     'Status'        => 'a',
                     'UpdateBy'      => $this->session->userdata("FullName"),
                     'UpdateTime'    => date('Y-m-d H:i:s')
@@ -806,14 +883,19 @@ class LcPurchase extends CI_Controller
                     'Product_SlNo'     => $data->Product_SlNo,
                     // 'Material_IDNo'    => $data->Material_IDNo,
                     'PurchaseMaster_SlNo' => isset($data->PurchaseMaster_SlNo) && $data->PurchaseMaster_SlNo != null ? $data->PurchaseMaster_SlNo : null,
-                    'Per_CBM'          => $data->Per_CBM,
-                    'Per_Ctn'          => $data->Per_Ctn,
-                    'Total_Ctn'        => $data->Total_Ctn,
-                    'LC_Cost'          => $data->LC_Cost,
-                    'CBM_Cost'         => $data->CBM_Cost,
-                    'Per_CBM_Cost'     => $data->Per_CBM_Cost,
-                    'Quantity'         => $data->Quantity,
-                    'Per_Pcs_Cost'     => $data->Per_Pcs_Cost,
+                    // 'Per_CBM'          => $data->Per_CBM,
+                    // 'Per_Ctn'          => $data->Per_Ctn,
+                    // 'Total_Ctn'        => $data->Total_Ctn,
+                    // 'LC_Cost'          => $data->LC_Cost,
+                    // 'CBM_Cost'         => $data->CBM_Cost,
+                    // 'Per_CBM_Cost'     => $data->Per_CBM_Cost,
+                    // 'Per_Pcs_Cost'     => $data->Per_Pcs_Cost,
+                    'Quantity'      => $data->Quantity,
+                    'expense_coast' => $data->expense_coast,
+                    'product_coast' => $data->product_coast,
+                    'product_value' => $data->product_value,
+                    'total_expense' => $data->total_expense,
+                    'total_value'   => $data->total_value,
                     'Status'           => 'a',
                     'AddBy'            => $this->session->userdata("FullName"),
                     'AddTime'          => date('Y-m-d H:i:s'),
@@ -821,10 +903,29 @@ class LcPurchase extends CI_Controller
                 );
                 $this->db->insert('tbl_cbm_costing', $cbmCosting);
             }
-            
 
+            // update product purchase price
+            $this->db->query("
+                update tbl_product
+                set Product_Purchase_Rate = ?
+                where Product_SlNo = ?
+                and branch_id = ?
+            ", [$data->product_coast, $data->Product_SlNo, $this->session->userdata('BRANCHid')]);
+
+            // update lc details
+            $this->db->query("
+                update tbl_lcpurchasedetails
+                set status = ?
+                where Product_IDNo = ?
+                and PurchaseMaster_IDNo = ?
+                and branch_id = ?
+            ", ['a', $data->Product_SlNo, $data->Lcc_SlNo, $this->session->userdata('BRANCHid')]);
+
+          
+            $this->db->trans_commit();
             $res = ['success' => true, 'message' => 'CBM costing inserted successfully.'];
         } catch (Exception $ex) {
+            $this->db->trans_rollback();
             $res = ['success' => false, 'message' => $ex->getMessage()];
         }
         echo json_encode($res);
@@ -842,14 +943,19 @@ class LcPurchase extends CI_Controller
                     'Item_Type'     => $data->Item_Type,
                     'Product_SlNo'  => $data->Product_SlNo,
                     'PurchaseMaster_SlNo' => isset($data->PurchaseMaster_SlNo) && $data->PurchaseMaster_SlNo != null ? $data->PurchaseMaster_SlNo : null,
-                    'Per_CBM'       => $data->Per_CBM,
-                    'Per_Ctn'       => $data->Per_Ctn,
-                    'Total_Ctn'     => $data->Total_Ctn,
-                    'LC_Cost'       => $data->LC_Cost,
-                    'CBM_Cost'      => $data->CBM_Cost,
-                    'Per_CBM_Cost'  => $data->Per_CBM_Cost,
+                    // 'Per_CBM'       => $data->Per_CBM,
+                    // 'Per_Ctn'       => $data->Per_Ctn,
+                    // 'Total_Ctn'     => $data->Total_Ctn,
+                    // 'LC_Cost'       => $data->LC_Cost,
+                    // 'CBM_Cost'      => $data->CBM_Cost,
+                    // 'Per_CBM_Cost'  => $data->Per_CBM_Cost,
+                    // 'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
                     'Quantity'      => $data->Quantity,
-                    'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
+                    'expense_coast' => $data->expense_coast,
+                    'product_coast' => $data->product_coast,
+                    'product_value' => $data->product_value,
+                    'total_expense' => $data->total_expense,
+                    'total_value'   => $data->total_value,
                     'Status'        => 'a',
                     'UpdateBy'      => $this->session->userdata("FullName"),
                     'UpdateTime'    => date('Y-m-d H:i:s')
@@ -861,14 +967,19 @@ class LcPurchase extends CI_Controller
                     'Item_Type'     => $data->Item_Type,
                     'Product_SlNo'  => $data->Product_SlNo,
                     'PurchaseMaster_SlNo' => isset($data->PurchaseMaster_SlNo) && $data->PurchaseMaster_SlNo != null ? $data->PurchaseMaster_SlNo : null,
-                    'Per_CBM'       => $data->Per_CBM,
-                    'Per_Ctn'       => $data->Per_Ctn,
-                    'Total_Ctn'     => $data->Total_Ctn,
-                    'LC_Cost'       => $data->LC_Cost,
-                    'CBM_Cost'      => $data->CBM_Cost,
-                    'Per_CBM_Cost'  => $data->Per_CBM_Cost,
+                    // 'Per_CBM'       => $data->Per_CBM,
+                    // 'Per_Ctn'       => $data->Per_Ctn,
+                    // 'Total_Ctn'     => $data->Total_Ctn,
+                    // 'LC_Cost'       => $data->LC_Cost,
+                    // 'CBM_Cost'      => $data->CBM_Cost,
+                    // 'Per_CBM_Cost'  => $data->Per_CBM_Cost,
+                    // 'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
                     'Quantity'      => $data->Quantity,
-                    'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
+                    'expense_coast' => $data->expense_coast,
+                    'product_coast' => $data->product_coast,
+                    'product_value' => $data->product_value,
+                    'total_expense' => $data->total_expense,
+                    'total_value'   => $data->total_value,
                     'Status'        => 'a',
                     'UpdateBy'      => $this->session->userdata("FullName"),
                     'UpdateTime'    => date('Y-m-d H:i:s')
@@ -1354,6 +1465,4 @@ class LcPurchase extends CI_Controller
         }
         echo json_encode($res);
     }
-
-   
 }

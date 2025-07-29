@@ -80,51 +80,38 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-4 control-label no-padding-right"> Per CBM </label>
-                            <label class="col-sm-1 control-label no-padding-right">:</label>
-                            <div class="col-sm-7">
-                                <input type="number" step="any" placeholder="Per CBM" class="form-control" id="per_cbm" ref="per_cbm" v-model="costing.Per_CBM" required v-on:input="calculateTotal" readonly/>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label no-padding-right"> Per Ctn</label>
-                            <label class="col-sm-1 control-label no-padding-right">:</label>
-                            <div class="col-sm-7">
-                                <input type="number" step="any" placeholder="Per Ctn" class="form-control" v-model="costing.Per_Ctn" required v-on:input="calculateTotal" readonly />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label no-padding-right"> Total Ctn </label>
-                            <label class="col-sm-1 control-label no-padding-right">:</label>
-                            <div class="col-sm-7">
-                                <input type="number" placeholder="Total Ctn" class="form-control" v-model="costing.Total_Ctn" required readonly />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
                             <label class="col-sm-4 control-label no-padding-right"> LC Expense </label>
                             <label class="col-sm-1 control-label no-padding-right">:</label>
                             <div class="col-sm-7">
-                                <input type="number" step="any" placeholder="LC Cost" class="form-control" v-model="costing.total_expense" required v-on:input="calculateTotal" readonly />
+                                <input type="number" step="any" placeholder="LC Cost" class="form-control" v-model="costing.total_expense" required  readonly />
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-4 control-label no-padding-right"> CBM </label>
+                            <label class="col-sm-4 control-label no-padding-right" title="Total Value"> Total BDT</label>
                             <label class="col-sm-1 control-label no-padding-right">:</label>
                             <div class="col-sm-7">
-                                <input type="number" step="any" placeholder="CBM" class="form-control" v-model="costing.CBM_Cost" required v-on:input="calculateTotal" readonly />
+                                <input type="number" step="any" placeholder="Total BDT" class="form-control" v-model="costing.total_value" required  readonly />
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                    <div class="col-md-6">
+                        
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label no-padding-right"> Expense Coast </label>
+                            <label class="col-sm-1 control-label no-padding-right">:</label>
+                            <div class="col-sm-7">
+                                <input type="number" placeholder="Expense Coast" class="form-control" v-model="costing.expense_coast" required readonly />
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-4 control-label no-padding-right"> Per CBM Cost </label>
+                            <label class="col-sm-4 control-label no-padding-right"> Product Value </label>
                             <label class="col-sm-1 control-label no-padding-right">:</label>
                             <div class="col-sm-7">
-                                <input type="number" placeholder="Per CBM Cost" class="form-control" v-model="costing.Per_CBM_Cost" required disabled />
+                                <input type="number" placeholder="Per CBM Cost" class="form-control" v-model="costing.product_value" required disabled />
                             </div>
                         </div>
 
@@ -132,15 +119,15 @@
                             <label class="col-sm-4 control-label no-padding-right"> Quantity </label>
                             <label class="col-sm-1 control-label no-padding-right">:</label>
                             <div class="col-sm-7">
-                                <input type="number" step="any" placeholder="Quantity" class="form-control" v-model="costing.Quantity" required v-on:input="calculateTotal" readonly />
+                                <input type="number" step="any" placeholder="Quantity" class="form-control" v-model="costing.Quantity" required  readonly />
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-4 control-label no-padding-right"> Per Pcs Cost </label>
+                            <label class="col-sm-4 control-label no-padding-right"> Product Cost </label>
                             <label class="col-sm-1 control-label no-padding-right">:</label>
                             <div class="col-sm-7">
-                                <input type="number" placeholder="Per Pcs Cost" class="form-control" v-model="costing.Per_Pcs_Cost" required disabled />
+                                <input type="number" placeholder="Per Pcs Cost" class="form-control" v-model="costing.product_coast" required disabled />
                             </div>
                         </div>
 
@@ -176,15 +163,10 @@
                             <td>{{ row.Costing_Date }}</td>
                             <td>{{ row.Lcc_No }}</td>
                             <td>{{ row.display_name }}</td>
-                            <!-- <td>{{ row.material_text }}</td> -->
-                            <td>{{ row.Per_CBM }}</td>
-                            <td>{{ row.Per_Ctn }}</td>
-                            <td>{{ row.Total_Ctn }}</td>
                             <td>{{ row.total_expense }}</td>
-                            <td>{{ row.CBM_Cost }}</td>
-                            <td>{{ row.Per_CBM_Cost }}</td>
+                            <td>{{ row.total_value }}</td>
                             <td>{{ row.Quantity }}</td>
-                            <td>{{ row.Per_Pcs_Cost }}</td>
+                            <td>{{ row.product_coast }}</td>
                             <td>
                                 <?php if ($this->session->userdata('accountType') != 'u') { ?>
                                     <button type="button" class="button edit" @click="editDutyCosting(row)">
@@ -223,14 +205,12 @@
                     Item_Type: 'Product',
                     Product_SlNo: '',
                     PurchaseMaster_SlNo: '',
-                    Per_CBM: '',
-                    Per_Ctn: '',
-                    Total_Ctn: 0,
-                    total_expense: '',
-                    CBM_Cost: '',
-                    Per_CBM_Cost: '',
-                    Quantity: '',
-                    Per_Pcs_Cost: ''
+                    product_coast: 0,
+                    product_value: 0,
+                    total_expense: 0,
+                    total_value: 0,
+                    Quantity: 0,
+                    expense_coast: 0
                 },
                 lc_numbers: [],
                 selectedLCNo: null,
@@ -259,43 +239,29 @@
                         align: 'center'
                     },
                     {
-                        label: 'Per CBM',
-                        field: 'Per_CBM',
-                        align: 'center'
-                    },
-                    {
-                        label: 'Per Ctn',
-                        field: 'Per_Ctn',
-                        align: 'center'
-                    },
-                    {
-                        label: 'Total Ctn',
-                        field: 'Total_Ctn',
-                        align: 'center'
-                    },
-                    {
-                        label: 'LC Cost',
+                        label: 'Expense',
                         field: 'total_expense',
                         align: 'center'
                     },
                     {
-                        label: 'CBM Cost',
-                        field: 'CBM_Cost',
+                        label: 'Total Value',
+                        field: 'total_value',
                         align: 'center'
                     },
-                    {
-                        label: 'Per CBM Cost',
-                        field: 'Per_CBM_Cost',
-                        align: 'center'
-                    },
+                    
+                    // {
+                    //     label: 'Product Price',
+                    //     field: 'product_value',
+                    //     align: 'center'
+                    // },
                     {
                         label: 'Quantity',
-                        field: 'Per_Pcs_Cost',
+                        field: 'Quantity',
                         align: 'center'
                     },
                     {
                         label: 'Per Pcs Cost',
-                        field: 'Total_Amount',
+                        field: 'product_coast',
                         align: 'center'
                     },
                     {
@@ -317,19 +283,12 @@
         },
         methods: {
             getLCNumbers() {
-                axios.post('/get_lc_purchase_record').then(res => {
+                axios.post('/get_pending_lc_purchase_record').then(res => {
                     this.lc_numbers = res.data;
                 })
             },
-            // getPurchases() {
-            //     axios.get("/get_purchases").then(res => {
-            //         this.invoices = res.data.purchases.filter((r) => r.status == 'p');
-            //     })
-            // },
           
             async lcOnChange() {
-                this.costing.CBM_Cost = this.selectedLCNo?.cbm
-                
                 if(this.selectedLCNo != null && this.selectedLCNo.purchase_id != null) {
                     let purchase = this.invoices.find(item => item.PurchaseMaster_SlNo ==  this.selectedLCNo.purchase_id);
                     this.selectedInvoice = purchase;
@@ -339,54 +298,29 @@
                 this.products = this.selectedLCNo.purchaseDetails;
 
                 this.costing.total_expense = this.selectedLCNo.expDetails.reduce((prev, curr)=> {return prev + parseFloat(curr.amount)}, 0).toFixed(2);
-                // this.costing.total_value = this.selectedLCNo.purchaseDetails.reduce((prev, item)=> {return prev + parseFloat(item.PurchaseDetails_TotalAmount)}, 0).toFixed(2);
-                this.costing.Per_CBM_Cost = parseFloat(this.costing.total_expense / this.costing.CBM_Cost).toFixed(2);
+                this.costing.total_value = this.selectedLCNo.purchaseDetails.reduce((prev, item)=> {return prev + parseFloat(item.PurchaseDetails_TotalAmount)}, 0).toFixed(2);
+                this.costing.expense_coast = parseFloat(this.costing.total_value / this.costing.total_expense).toFixed(2);
+                // this.costing.expense_coast = (parseFloat(this.costing.total_expense) / parseFloat(this.costing.total_value)).toFixed(2);
             },
 
             async getPurchaseProduct() {
                 this.selectedProduct == null;
-
                 if (this.selectedInvoice == null) {
                     return
                 }
-
                 axios.post('/get_purchase_products', {
                     PurchaseId: this.selectedInvoice.PurchaseMaster_SlNo
                 }).then(res => {
                     this.products = res.data.products;
                 })
-
                 let productSearchBox = document.querySelector('#product input[role="combobox"]');
                 productSearchBox.focus();
             },
             
-            async productOnChange() {
-                // this.costing.Per_CBM = this.selectedProduct.perCBM;
-                // this.costing.Per_Ctn = this.selectedProduct.perCTN;
-                // this.costing.Total_Ctn = this.selectedProduct.totalCTN;
-                console.log(this.selectedProduct);
-                
+            productOnChange() {
                 this.costing.Quantity = this.selectedProduct.PurchaseDetails_TotalQuantity;
-                
-                this.calculateTotal();
-                this.$refs.per_cbm.focus();
-            },
-
-            calculateTotal() {
-                let per_cbm = isNaN(this.costing.Per_CBM) ? 0 : this.costing.Per_CBM;
-                let per_ctn = isNaN(this.costing.Per_Ctn) ? 0 : this.costing.Per_Ctn;
-                let total_expense = isNaN(this.costing.total_expense) ? 0 : this.costing.total_expense;
-                let cbm_cost = isNaN(this.costing.CBM_Cost) ? 0 : this.costing.CBM_Cost;
-                let quantity = isNaN(this.costing.Quantity) ? 0 : this.costing.Quantity;
-
-                let total_ctn = (parseFloat(per_cbm) / parseFloat(per_ctn)).toFixed(2);
-                let per_cbm_cost = (parseFloat(total_expense) / (parseFloat(cbm_cost))).toFixed(2);
-                // let per_pcs_cost = ((parseFloat(per_cbm_cost) / parseFloat(total_ctn)) / parseFloat(quantity)).toFixed(2);
-                let per_pcs_cost = ((parseFloat(per_cbm_cost) * parseFloat(per_cbm)) / parseFloat(quantity)).toFixed(2);
-
-                this.costing.Total_Ctn = isNaN(total_ctn) ? 0 : total_ctn;
-                this.costing.Per_CBM_Cost = isNaN(per_cbm_cost) ? 0 : per_cbm_cost;
-                this.costing.Per_Pcs_Cost = isNaN(per_pcs_cost) ? 0 : per_pcs_cost;
+                this.costing.product_value = this.selectedProduct.PurchaseDetails_Rate;
+                this.costing.product_coast = parseFloat((this.costing.product_value * this.costing.expense_coast) / this.costing.Quantity).toFixed(2);
             },
 
             addDutyCosting() {
@@ -399,30 +333,21 @@
                     alert('Select a Product');
                     return;
                 }
-
-                if (this.costing.Per_CBM == '' ||
-                    this.costing.Per_Ctn == '' ||
-                    this.costing.Total_Ctn == '' ||
-                    this.costing.total_expense == '' ||
-                    this.costing.CBM_Cost == '' ||
-                    this.costing.Per_CBM_Cost == '' ||
-                    this.costing.Quantity == '' ||
-                    this.costing.Per_Pcs_Cost == '') {
-                    alert('Input field is required.');
-                    return;
-                }
-
+                
                 this.costing.Lcc_SlNo = this.selectedLCNo.lc_purchase_master_id;
                 
-                this.costing.PurchaseMaster_SlNo = this.selectedInvoice == null || this.selectedInvoice == '' ? null : this.selectedInvoice.PurchaseMaster_SlNo;
+                this.costing.PurchaseMaster_SlNo = this.selectedLCNo == null || this.selectedLCNo == '' ? null : this.selectedLCNo.purchase_id;
                 
-
+                
                 if (this.selectedProduct != null) {
-                    this.costing.Product_SlNo = this.selectedProduct.Product_SlNo;
+                    this.costing.Product_SlNo = this.selectedProduct.Product_IDNo;
                 } else {
                     this.costing.Product_SlNo = null;
                 }
 
+                // console.log(this.selectedProduct);
+                // return;
+                
                 let url = '/add_cbm_costing';
                 if (this.costing.Costing_SlNo != 0) {
                     url = '/update_cbm_costing'
@@ -435,6 +360,7 @@
                         this.resetForm();
                         this.getDutyCostings();
                     }
+                    this.getLCNumbers();
                 })
             },
 
@@ -505,16 +431,14 @@
                     Lcc_SlNo: '',
                     Item_Type: 'Product',
                     Product_SlNo: '',
-                    Material_IDNo: '',
                     PurchaseMaster_SlNo: '',
-                    Per_CBM: '',
-                    Per_Ctn: '',
-                    Total_Ctn: 0,
-                    total_expense: '',
-                    CBM_Cost: '',
-                    Per_CBM_Cost: '',
-                    Quantity: '',
-                    Per_Pcs_Cost: ''
+                    product_coast: 0,
+                    product_value: 0,
+                    total_expense: 0,
+                    total_expense: 0,
+                    total_value: 0,
+                    Quantity: 0,
+                    expense_coast: 0
                 };
 
                 this.selectedLCNo = null;
