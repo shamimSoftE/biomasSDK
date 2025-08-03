@@ -36,7 +36,6 @@ const lcInvoice = Vue.component("lc-invoice", {
                                     <td>LC Number</td>
                                     <td>Supplier Name</td>
                                     <td>Description</td>
-                                    <td>CBM</td>
                                     <td>Total</td>
                                     <td>Paid(%)</td>
                                     <td>Paid</td>
@@ -52,7 +51,6 @@ const lcInvoice = Vue.component("lc-invoice", {
                                     <td>{{ lc.PurchaseMaster_InvoiceNo }}</td>
                                     <td> {{ lc.Supplier_Name }} </td>
                                     <td>{{ lc.PurchaseMaster_Description }}</td>
-                                    <td>{{ lc.cbm }}</td>
                                     <td>{{ lc.PurchaseMaster_TotalAmount }}</td>
                                     <td>{{ lc.paidPercentage }}</td>
                                     <td>{{ lc.paid }}</td>
@@ -76,7 +74,7 @@ const lcInvoice = Vue.component("lc-invoice", {
                                 <td>Quantity</td>
                                 <td>Unit</td>
                                 <td>Cur.</td>
-                                <td>Total Value</td>
+                                <td style="display:none;">Total Value</td>
                                 <td>Cur. Rate</td>
                                 <td>Purchase Rate</td>
                                 <td>Total</td>
@@ -89,15 +87,15 @@ const lcInvoice = Vue.component("lc-invoice", {
                                     <td> {{ lc.PurchaseDetails_TotalQuantity }}</td>
                                     <td> {{ lc.Unit_Name }}</td>
                                     <td> {{ lc.currency_name }}</td>
-                                    <td> {{ lc.currency_value }}</td>
+                                    <td style="display:none;"> {{ lc.currency_value }}</td>
                                     <td> {{ lc.currency_rate }}</td>
                                     <td> {{ lc.PurchaseDetails_Rate }}</td>
                                     <td> {{ lc.PurchaseDetails_TotalAmount }}</td>
                                 </tr>
                                 <tr> 
-                                    <td colspan="7" style="font-weight:bold; text-align: right;"> Total Amount </td>
+                                    <td colspan="6" style="font-weight:bold; text-align: right;"> Total Amount </td>
                                     <td style="font-weight:bold;">
-                                    {{ productTotal = productCart.reduce((prev,curr) => {return prev + parseFloat(curr.PurchaseDetails_TotalAmount)}, 0) | decimal }}
+                                        {{ productTotal = productCart.reduce((prev,curr) => {return prev + parseFloat(curr.PurchaseDetails_TotalAmount)}, 0) | decimal }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -129,7 +127,7 @@ const lcInvoice = Vue.component("lc-invoice", {
                     </div>
 
                     <div class="col-xs-6 m-auto">
-                        <h5 style="margin-bottom:4px; margin-top:10px; text-align:center; font-weight:bold;"> Duty Cost</h5>
+                        <h5 style="margin-bottom:4px; margin-top:10px; text-align:center; font-weight:bold;"> Cost</h5>
                         <table class="pull-left" _a584de>
                             <thead>
                             <tr>
@@ -139,13 +137,13 @@ const lcInvoice = Vue.component("lc-invoice", {
                             </thead>
 
                             <tbody> 
-                                <tr v-for="item in dutyCart"> 
+                                <tr v-for="item in cbmCosting"> 
                                     <td> {{item.Product_Name}}</td>
-                                    <td> {{item.Total_Amount}}</td>
+                                    <td> {{item.product_coast}}</td>
                                 </tr>
                                 <tr> 
-                                    <td style="font-weight:bold; text-align: right;"> Total Duty Cost: </td>
-                                    <td style="font-weight:bold;"> {{ duty = dutyCart.reduce((prev,curr) => {return prev + parseFloat(curr.Total_Amount)}, 0) | decimal }} </td>
+                                    <td style="font-weight:bold; text-align: right;"> Total Cost: </td>
+                                    <td style="font-weight:bold;"> {{ duty = cbmCosting.reduce((prev,curr) => {return prev + parseFloat(curr.product_coast)}, 0) | decimal }} </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -157,15 +155,15 @@ const lcInvoice = Vue.component("lc-invoice", {
                             <table class="pull-left" _a584de>
                                 <tr>
                                     <td> Total Product Cost</td>
-                                    <td>  {{ productTotal }}  </td>
+                                    <td> {{ productTotal }} </td>
                                 </tr>
                                 <tr>
                                     <td> Total Expense Cost</td>
                                     <td> {{ cart.reduce((prev,curr) => {return prev + parseFloat(curr.amount)}, 0) | decimal }} </td>
                                 </tr>
                                 <tr>
-                                    <td> Total Duty Cost </td>
-                                    <td> {{ dutyCart.reduce((prev,curr) => {return prev + parseFloat(curr.Total_Amount)}, 0) | decimal }} </td>
+                                    <td> Total CBM Cost </td>
+                                    <td> {{ cbmCosting.reduce((prev,curr) => {return prev + parseFloat(curr.product_coast)}, 0) | decimal }} </td>
                                 </tr>
                                 <tr>
                                     <td style="font-weight:bold;"> Total </td>
@@ -199,8 +197,9 @@ const lcInvoice = Vue.component("lc-invoice", {
                 SaleMaster_Description: null,
                 AddBy: null,
             },
+            productTotal: 0,
             cart: [],
-            dutyCart: [],
+            cbmCosting: [],
             lc: [],
             productCart: [],
             style: null,
@@ -228,7 +227,7 @@ const lcInvoice = Vue.component("lc-invoice", {
                 this.lc = res.data.purchases[0]; 
                 this.cart = res.data.expDetails;
                 this.productCart = res.data.purchaseDetails;
-                this.dutyCart = res.data.lcDutyCosting;
+                this.cbmCosting = res.data.cbmCosting;
             });
         },
 

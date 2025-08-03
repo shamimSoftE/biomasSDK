@@ -46,7 +46,7 @@ class Graph extends CI_Controller
                 order by sm.SaleMaster_SlNo desc limit 20
             ", $this->branchId)->result();
 
-        // Today's Sale
+        // Today's Sale ---------------
         $todaysSale = $this->db->query("
                 select 
                     ifnull(sum(ifnull(sm.SaleMaster_TotalSaleAmount, 0)), 0) as total_amount

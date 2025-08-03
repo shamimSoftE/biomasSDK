@@ -215,12 +215,13 @@
 							<div class="form-group">
 								<label class="control-label col-xs-3">Unit:</label>
 								<div class="col-xs-9">
-									<select class="form-control" v-if="units.length == 0"></select>
-									<v-select v-bind:options="units" v-model="selectedUnit" label="Unit_Name" v-if="units.length > 0"></v-select>
+									<input type="text" name="selectedUnit" class="form-control" placeholder="Unit Name" v-model="selectedUnit" readonly />
+									<!-- <select class="form-control" v-if="units.length == 0"></select>
+									<v-select v-bind:options="units" v-model="selectedUnit" label="Unit_Name" v-if="units.length > 0"></v-select> -->
 								</div>
 							</div>
 
-							<div class="form-group" >
+							<!-- <div class="form-group" >
 								<label class="col-xs-3 control-label no-padding-right" style="padding-right: 0;"> Per Value</label>
 								<div class="col-xs-3">
 									<input type="text" id="productTotal" placeholder="0" class="form-control" v-model="selectedProduct.perForeignAmount" v-on:input="productValueTotal" />
@@ -229,7 +230,7 @@
 								<div class="col-xs-4">
 									<input type="text" id="productTotal" placeholder="Amount" class="form-control" v-model="selectedProduct.totalForeignAmount" />
 								</div>
-							</div>
+							</div> -->
 
 							<div class="form-group" >
 								<label class="col-xs-3 control-label no-padding-right" title="Currency Rate"> Cur. Rate </label>
@@ -274,9 +275,9 @@
 							<th style="width:13%;color:#000;">Category</th>
 							<th style="width:8%;color:#000;">Currency</th>
 							<th style="width:8%;color:#000;">Currency Rate</th>
-							<th style="width:8%;color:#000;" title="Total currency rate">
+							<!-- <th style="width:8%;color:#000;" title="Total currency rate">
 								Total Value
-							</th>
+							</th> -->
 							<th style="width:5%;color:#000;">Qty</th>
 							<th style="width:5%;color:#000;">Unit</th>
 							<th style="width:8%;color:#000;">Rate</th>
@@ -296,10 +297,8 @@
 								style="margin:0;padding: 0 5px; width: 70px; text-align: center;"
 								@input="currencyRateChange(product)" />
 							</td>
-							<td>
-								{{ product.totalForeignAmount }}
+							<!-- <td> {{ product.totalForeignAmount }} </td> -->
 								<!-- <input type="number" min="0" step="any" v-model="product.currency_rate" style="margin:0;padding: 0 5px; width: 70px; text-align: center;" @input="quantityRateChange" /> -->
-							</td>
 							<td>
 								{{ product.quantity }}
 								<!-- <input type="number" min="0" step="any" v-model="product.quantity" style="margin:0;padding: 0 5px; width: 70px; text-align: center;" @input="quantityRateChange" /> -->
@@ -313,16 +312,16 @@
 						</tr>
 
 						<tr>
-							<td colspan="8"></td>
+							<td colspan="10"></td>
 						</tr>
 
 						<tr style="font-weight: bold;">
-							<td colspan="8">Note</td>
+							<td colspan="7">Note</td>
 							<td colspan="3">Total</td>
 						</tr>
 
 						<tr>
-							<td colspan="8"><textarea class="form-control" style="font-size:13px;margin-top:3px;" placeholder="Note" v-model="purchase.note"></textarea></td>
+							<td colspan="7"><textarea class="form-control" style="font-size:13px;margin-top:3px;" placeholder="Note" v-model="purchase.note"></textarea></td>
 							<td colspan="3" style="padding-top: 15px;font-size:18px;">{{ purchase.total }}</td>
 						</tr>
 					</tbody>
@@ -636,16 +635,14 @@
                 })
             },
 
-			productValueTotal() {
-                let totalAmountValue = (parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.perForeignAmount)).toFixed(2);
-                this.selectedProduct.totalForeignAmount = parseFloat(totalAmountValue).toFixed(2);
-            },
+			//productValueTotal() {
+            //   let totalAmountValue = (parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.perForeignAmount)).toFixed(2);
+            //   this.selectedProduct.totalForeignAmount = parseFloat(totalAmountValue).toFixed(2);
+            // },
 
 			async onChangePurchase() {
                 if(this.selectedPurchase != null) {
-
                     this.cart = [];					
-
                     if (this.selectedPurchase != null) {
                         await axios.post('/get_purchases', {
                             purchaseId: this.selectedPurchase.PurchaseMaster_SlNo
@@ -771,18 +768,28 @@
 				if (this.selectedProduct.Product_SlNo == '') {
 					return
 				}
+
+				this.selectedUnit = this.selectedProduct.Unit_Name;
+				
+
 				this.selectedProduct.quantity = this.selectedProduct.PurchaseDetails_TotalQuantity
 				this.$refs.quantity.focus();
 			},
 
 			productTotal() {
-				let currencyProductPrice = (parseFloat(this.selectedProduct.totalForeignAmount) / parseFloat(this.selectedProduct.quantity)).toFixed(2);
+				// let currencyProductPrice = (parseFloat(this.selectedProduct.totalForeignAmount) / parseFloat(this.selectedProduct.quantity)).toFixed(2);
+                // this.selectedProduct.Product_Purchase_Rate = (parseFloat(currencyProductPrice) * parseFloat(this.selectedProduct.Product_currency_Rate)).toFixed(2);
+                // this.selectedProduct.total = (parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.Product_Purchase_Rate)).toFixed(2);
+
+				// new -----------------
+				let currencyProductPrice = (parseFloat(this.selectedProduct.quantity)).toFixed(2);
                 this.selectedProduct.Product_Purchase_Rate = (parseFloat(currencyProductPrice) * parseFloat(this.selectedProduct.Product_currency_Rate)).toFixed(2);
                 this.selectedProduct.total = (parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.Product_Purchase_Rate)).toFixed(2);
 			},
 
 			currencyRateChange(product) {
-                product.currencyProductPrice = (parseFloat(product.totalForeignAmount) / parseFloat(product.quantity)).toFixed(2);
+                // product.currencyProductPrice = (parseFloat(product.totalForeignAmount) / parseFloat(product.quantity)).toFixed(2);
+                product.currencyProductPrice = parseFloat(product.quantity).toFixed(2);
                 product.purchaseRate = (parseFloat(product.ProductCurrencyRate) * parseFloat(product.currencyProductPrice)).toFixed(2);
                 product.total =(parseFloat(product.purchaseRate) * parseFloat(product.quantity)).toFixed(2);
             },
@@ -817,8 +824,8 @@
 					purchaseRate  : this.selectedProduct.Product_Purchase_Rate,
 					salesRate     : this.selectedProduct.Product_SellingPrice,
 					quantity      : this.selectedProduct.quantity,
-					Unit_ID		  : this.selectedUnit.Unit_SlNo,
-					Unitname	  : this.selectedUnit.Unit_Name,
+					Unit_ID		  : this.selectedProduct.Unit_ID,
+					Unitname	  : this.selectedProduct.Unit_Name,
 					total         : this.selectedProduct.total
 				}
 

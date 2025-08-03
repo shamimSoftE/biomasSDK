@@ -85,6 +85,7 @@ class Purchase extends CI_Controller
         if (isset($data->status) && $data->status != '') {
             $status = $data->status;
         }
+
         if (isset($data->name) && $data->name != '') {
             $clauses .= " or pm.PurchaseMaster_InvoiceNo like '$data->name%'";
         }
@@ -111,6 +112,7 @@ class Purchase extends CI_Controller
                     p.Product_Code,
                     p.ProductCategory_ID,
                     p.Product_SellingPrice,
+                    p.Unit_ID,
                     pc.ProductCategory_Name,
                     u.Unit_Name
                 from tbl_purchasedetails pd 

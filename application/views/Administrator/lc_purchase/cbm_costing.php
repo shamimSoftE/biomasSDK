@@ -61,7 +61,7 @@
     <fieldset class="scheduler-border entryFrom">
         <div class="control-group">
             <div class="row" style="margin-top: 15px;">
-                <form class="form-horizontal" @submit.prevent="addDutyCosting">
+                <form class="form-horizontal" @submit.prevent="addCosting">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="col-sm-4 control-label no-padding-right"> LC No </label>
@@ -83,7 +83,7 @@
                             <label class="col-sm-4 control-label no-padding-right"> LC Expense </label>
                             <label class="col-sm-1 control-label no-padding-right">:</label>
                             <div class="col-sm-7">
-                                <input type="number" step="any" placeholder="LC Cost" class="form-control" v-model="costing.total_expense" required  readonly />
+                                <input type="number" step="any" placeholder="LC Cost" class="form-control" v-model="costing.total_expense" required readonly />
                             </div>
                         </div>
 
@@ -169,9 +169,9 @@
                             <td>{{ row.product_coast }}</td>
                             <td>
                                 <?php if ($this->session->userdata('accountType') != 'u') { ?>
-                                    <button type="button" class="button edit" @click="editDutyCosting(row)">
+                                    <!-- <button type="button" class="button edit" @click="editDutyCosting(row)">
                                         <i class="fa fa-pencil"></i>
-                                    </button>
+                                    </button> -->
                                     <button type="button" class="button" @click="deleteDutyCosting(row.Costing_SlNo)">
                                         <i class="fa fa-trash"></i>
                                     </button>
@@ -296,11 +296,13 @@
                 }
 
                 this.products = this.selectedLCNo.purchaseDetails;
+                // console.log(this.selectedLCNo);
+                // return;
 
                 this.costing.total_expense = this.selectedLCNo.expDetails.reduce((prev, curr)=> {return prev + parseFloat(curr.amount)}, 0).toFixed(2);
                 this.costing.total_value = this.selectedLCNo.purchaseDetails.reduce((prev, item)=> {return prev + parseFloat(item.PurchaseDetails_TotalAmount)}, 0).toFixed(2);
-                this.costing.expense_coast = parseFloat(this.costing.total_value / this.costing.total_expense).toFixed(2);
-                // this.costing.expense_coast = (parseFloat(this.costing.total_expense) / parseFloat(this.costing.total_value)).toFixed(2);
+                // this.costing.expense_coast = parseFloat(this.costing.total_value / this.costing.total_expense).toFixed(2);
+                this.costing.expense_coast = (parseFloat(this.costing.total_expense) / parseFloat(this.costing.total_value)).toFixed(6);
             },
 
             async getPurchaseProduct() {
@@ -321,9 +323,10 @@
                 this.costing.Quantity = this.selectedProduct.PurchaseDetails_TotalQuantity;
                 this.costing.product_value = this.selectedProduct.PurchaseDetails_Rate;
                 this.costing.product_coast = parseFloat((this.costing.product_value * this.costing.expense_coast) / this.costing.Quantity).toFixed(2);
+                
             },
 
-            addDutyCosting() {
+            addCosting() {
                 if (this.selectedLCNo == null) {
                     alert('Select a LC No');
                     return;
@@ -338,21 +341,16 @@
                 
                 this.costing.PurchaseMaster_SlNo = this.selectedLCNo == null || this.selectedLCNo == '' ? null : this.selectedLCNo.purchase_id;
                 
-                
                 if (this.selectedProduct != null) {
                     this.costing.Product_SlNo = this.selectedProduct.Product_IDNo;
                 } else {
                     this.costing.Product_SlNo = null;
                 }
-
-                // console.log(this.selectedProduct);
-                // return;
                 
                 let url = '/add_cbm_costing';
                 if (this.costing.Costing_SlNo != 0) {
                     url = '/update_cbm_costing'
                 }
-
                 axios.post(url, this.costing).then(res => {
                     let r = res.data;
                     alert(r.message);
@@ -364,43 +362,23 @@
                 })
             },
 
-            editDutyCosting(costing) {
-                let keys = Object.keys(this.costing);
-                keys.forEach(key => this.costing[key] = costing[key]);
+            // editDutyCosting(costing) {
+            //     let keys = Object.keys(this.costing);
+            //     keys.forEach(key => this.costing[key] = costing[key]);
 
-                this.selectedLCNo = {
-                    Lcc_SlNo: costing.Lcc_SlNo,
-                    lc_purchase_master_id: costing.Lcc_SlNo,
-                    purchase_id: costing.PurchaseMaster_SlNo,
-                    PurchaseMaster_InvoiceNo: costing.Lcc_No,
-                    Lcc_No: costing.Lcc_No,
-                    lc_number: costing.Lcc_No
-                }
-
-                if (costing.Item_Type == 'Product') {
-                    this.selectedInvoice = {
-                        PurchaseMaster_SlNo: costing.PurchaseMaster_SlNo,
-                        invoice_text: `${costing.PurchaseMaster_InvoiceNo} - ${costing.Supplier_Name}`
-                    }
-                }              
-
-                if (costing.Item_Type == 'Product') {
-                    this.selectedProduct = {
-                        Product_SlNo: costing.Product_SlNo,
-                        display_text: `${costing.Product_Code} - ${costing.Product_Name}`
-                    }
-                }
-                
-                setTimeout(() => {
-                    this.costing.CBM_Cost = costing.CBM_Cost
-                    this.costing.Per_CBM = costing.Per_CBM
-                    this.costing.Per_CBM_Cost = costing.Per_CBM_Cost
-                    this.costing.Per_Ctn = costing.Per_Ctn
-                    this.costing.Per_Pcs_Cost = costing.Per_Pcs_Cost
-                    this.costing.Quantity = costing.Quantity
-                    this.costing.Total_Ctn = costing.Total_Ctn
-                }, 1000);
-            },
+            //     this.selectedLCNo = {
+            //         Lcc_SlNo: costing.Lcc_SlNo,
+            //         lc_purchase_master_id: costing.Lcc_SlNo,
+            //         purchase_id: costing.PurchaseMaster_SlNo,
+            //         PurchaseMaster_InvoiceNo: costing.Lcc_No,
+            //         Lcc_No: costing.Lcc_No,
+            //         lc_number: costing.Lcc_No
+            //     }
+            //     this.selectedProduct = {
+            //         Product_Name: costing.Product_Name,
+            //         Product_SlNo: costing.Product_SlNo,
+            //     };
+            // },
 
             deleteDutyCosting(costingId) {
                 let deleteConfirm = confirm('Are you sure?');

@@ -188,6 +188,7 @@ class LcPurchase extends CI_Controller
         if (isset($data->status) && $data->status != '') {
             $status = $data->status;
         }
+
         if (isset($data->name) && $data->name != '') {
             $clauses .= " or pm.PurchaseMaster_InvoiceNo like '$data->name%'";
         }
@@ -235,15 +236,26 @@ class LcPurchase extends CI_Controller
                 and pd.status != 'd'
             ")->result();
 
-            $res['lcDutyCosting'] = $this->db->query("
-                SELECT 
-                    dc.*, p.Product_Name
-                from tbl_duty_costing dc
-                left join tbl_product p on p.Product_SlNo = dc.Product_SlNo
-                where dc.Lcc_SlNo = '$data->purchaseId'
-                and dc.Status = 'a'
-                and dc.Costing_BranchId = ?
-            ", $this->brunch)->result();
+            $res['cbmCosting'] = $this->db->query("
+                select
+                    cc.product_coast,
+                    pr.Product_Name,
+                    pr.Product_Code
+                from tbl_cbm_costing cc
+                left join tbl_product pr on pr.Product_SlNo  = cc.Product_SlNo
+                where cc.Lcc_SlNo = '$data->purchaseId'
+                and cc.status != 'd'
+            ")->result();
+
+            // $res['lcDutyCosting'] = $this->db->query("
+            //     SELECT 
+            //         dc.*, p.Product_Name
+            //     from tbl_duty_costing dc
+            //     left join tbl_product p on p.Product_SlNo = dc.Product_SlNo
+            //     where dc.Lcc_SlNo = '$data->purchaseId'
+            //     and dc.Status = 'a'
+            //     and dc.Costing_BranchId = ?
+            // ", $this->brunch)->result();
         }
 
         $purchases = $this->db->query("
@@ -531,7 +543,7 @@ class LcPurchase extends CI_Controller
                     'PurchaseDetails_Rate'          => $product->purchaseRate,
                     'PurchaseDetails_TotalAmount'   => $product->total,
                     'currency_name'                 => $product->currencyName,
-                    'currency_value'                => $product->totalForeignAmount,
+                    'currency_value'                => $product->totalForeignAmount ?? 0,
                     'currency_rate'                 => $product->ProductCurrencyRate,
                     'status'                        => 'p',
                     'AddBy'                         => $this->session->userdata("userId"),
@@ -838,7 +850,7 @@ class LcPurchase extends CI_Controller
         if (!$access) {
             redirect(base_url());
         }
-        $data['title'] = "Add CBM Costing";
+        $data['title'] = "Costing";
         $data['content'] = $this->load->view('Administrator/lc_purchase/cbm_costing', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
@@ -857,13 +869,6 @@ class LcPurchase extends CI_Controller
                     'Item_Type'     => $data->Item_Type,
                     'Product_SlNo'  => $data->Product_SlNo,
                     'PurchaseMaster_SlNo' => isset($data->PurchaseMaster_SlNo) && $data->PurchaseMaster_SlNo != null ? $data->PurchaseMaster_SlNo : null,
-                    // 'Per_CBM'       => $data->Per_CBM,
-                    // 'Per_Ctn'       => $data->Per_Ctn,
-                    // 'Total_Ctn'     => $data->Total_Ctn,
-                    // 'LC_Cost'       => $data->LC_Cost,
-                    // 'CBM_Cost'      => $data->CBM_Cost,
-                    // 'Per_CBM_Cost'  => $data->Per_CBM_Cost,
-                    // 'Per_Pcs_Cost'  => $data->Per_Pcs_Cost,
                     'Quantity'      => $data->Quantity,
                     'expense_coast' => $data->expense_coast,
                     'product_coast' => $data->product_coast,
@@ -881,15 +886,7 @@ class LcPurchase extends CI_Controller
                     'Lcc_SlNo'         => $data->Lcc_SlNo,
                     'Item_Type'        => $data->Item_Type,
                     'Product_SlNo'     => $data->Product_SlNo,
-                    // 'Material_IDNo'    => $data->Material_IDNo,
                     'PurchaseMaster_SlNo' => isset($data->PurchaseMaster_SlNo) && $data->PurchaseMaster_SlNo != null ? $data->PurchaseMaster_SlNo : null,
-                    // 'Per_CBM'          => $data->Per_CBM,
-                    // 'Per_Ctn'          => $data->Per_Ctn,
-                    // 'Total_Ctn'        => $data->Total_Ctn,
-                    // 'LC_Cost'          => $data->LC_Cost,
-                    // 'CBM_Cost'         => $data->CBM_Cost,
-                    // 'Per_CBM_Cost'     => $data->Per_CBM_Cost,
-                    // 'Per_Pcs_Cost'     => $data->Per_Pcs_Cost,
                     'Quantity'      => $data->Quantity,
                     'expense_coast' => $data->expense_coast,
                     'product_coast' => $data->product_coast,
@@ -912,6 +909,9 @@ class LcPurchase extends CI_Controller
                 and branch_id = ?
             ", [$data->product_coast, $data->Product_SlNo, $this->session->userdata('BRANCHid')]);
 
+            // $this->db->query("
+            // ")
+
             // update lc details
             $this->db->query("
                 update tbl_lcpurchasedetails
@@ -923,7 +923,7 @@ class LcPurchase extends CI_Controller
 
           
             $this->db->trans_commit();
-            $res = ['success' => true, 'message' => 'CBM costing inserted successfully.'];
+            $res = ['success' => true, 'message' => 'Costing inserted successfully.'];
         } catch (Exception $ex) {
             $this->db->trans_rollback();
             $res = ['success' => false, 'message' => $ex->getMessage()];
@@ -987,11 +987,10 @@ class LcPurchase extends CI_Controller
                 $this->db->where('Costing_SlNo', $data->Costing_SlNo)->update('tbl_cbm_costing', $cbmCosting);
             }
 
-            $res = ['success' => true, 'message' => 'CBM costing updated successfully.'];
+            $res = ['success' => true, 'message' => 'Costing updated successfully.'];
         } catch (Exception $ex) {
             $res = ['success' => false, 'message' => $ex->getMessage()];
         }
-
         echo json_encode($res);
     }
 

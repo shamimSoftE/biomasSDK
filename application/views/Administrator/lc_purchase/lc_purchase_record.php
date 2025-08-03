@@ -176,8 +176,13 @@
 								<td style="text-align:right;">{{ purchase.purchaseDetails[0].PurchaseDetails_Rate | decimal }}</td>
 								<td style="text-align:right;">{{ purchase.purchaseDetails[0].PurchaseDetails_TotalAmount | decimal }}</td>
 								<td style="text-align:center;">
-									<button type="button" @click="changeStatus(purchase)" v-if="purchase.status == 'p'" style="color:rgb(241, 11, 11);">Pending</button>
-									<span v-if="purchase.status == 'a'" style="color: #32a852;">Approved</span>
+									<div v-if="purchase.costing_status == 1">
+										<button type="button" @click="changeStatus(purchase)" v-if="purchase.status == 'p'" style="color:rgb(241, 11, 11);">Pending</button>
+										<span v-if="purchase.status == 'a'" style="color: #32a852;">Approved</span>
+									</div>
+									<div v-else>
+										<button type="button" disabled style="color:rgb(241, 11, 11);">Pending</button>
+									</div>
 								</td>
 								<td style="text-align:center;">
 									<a href="" title="Purchase Invoice" v-bind:href="`/lc_purchase_invoice_print/${purchase.lc_purchase_master_id}`" target="_blank"><i class="fa fa-file-text"></i></a>
@@ -242,8 +247,13 @@
 							<td style="text-align:right;">{{ purchase.PurchaseMaster_TotalAmount | decimal }}</td>
 							<td style="text-align:left;">{{ purchase.PurchaseMaster_Description }}</td>
 							<td style="text-align:center;">
-								<button type="button" @click="changeStatus(purchase)" v-if="purchase.status == 'p'" style="color:rgb(241, 11, 11);">Pending</button>
-								<span v-if="purchase.status == 'a'" style="color: #32a852;">Approved</span>
+								<div v-if="purchase.costing_status == 1">
+									<button type="button" @click="changeStatus(purchase)" v-if="purchase.status == 'p'" style="color:rgb(241, 11, 11);">Pending</button>
+									<span v-if="purchase.status == 'a'" style="color: #32a852;">Approved</span>
+								</div>
+								<div v-else>
+									<button type="button" disabled style="color:rgb(241, 11, 11);">Pending</button>
+								</div>
 							</td>
 							<td style="text-align:center;">
 								<a href="" title="Purchase Invoice" v-bind:href="`/lc_purchase_invoice_print/${purchase.lc_purchase_master_id}`" target="_blank"><i class="fa fa-file-text"></i></a>

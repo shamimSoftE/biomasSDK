@@ -6,6 +6,9 @@ ALTER TABLE `tbl_cbm_costing` CHANGE `Per_CBM` `Per_CBM` FLOAT NOT NULL DEFAULT 
 
 ALTER TABLE `tbl_cbm_costing` ADD `expense_coast` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `Per_Pcs_Cost`, ADD `product_coast` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `expense_coast`, ADD `product_value` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `product_coast`, ADD `total_expense` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `product_value`, ADD `total_value` DECIMAL(18,2) NOT NULL DEFAULT '0.00' AFTER `total_expense
 
+============================ 03 August 2025 ========================
+ALTER TABLE `tbl_lcpurchasemaster` ADD `costing_status` INT NULL DEFAULT '0' COMMENT '0 = note yet cost add.' AFTER `paid`;
+
 
 
 

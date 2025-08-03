@@ -202,7 +202,7 @@
 
 			getLCPurchase() {
 				axios.get('/get_lc_purchase_record').then(res => {
-					this.lcPurchases = res.data.purchases;
+					this.lcPurchases = res.data;
 				})
 			},
 

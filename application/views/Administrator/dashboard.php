@@ -501,7 +501,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 									<i class="menu-icon fa fa-cube"></i>
 								</div>
 								<div class="textModule" style="line-height: 13px;">
-									CBM Costing
+									 Costing
 								</div>
 							</a>
 						</div>
@@ -509,7 +509,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 				<?php endif; ?>
 
 				<?php if (array_search("duty_costing", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
-					<div class="col-md-2">
+					<!-- <div class="col-md-2">
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>duty_costing">
 								<div class="logo">
@@ -520,11 +520,11 @@ if ($module == 'dashboard' or $module == '') { ?>
 								</div>
 							</a>
 						</div>
-					</div>
+					</div> -->
 				<?php endif; ?>
 				
 				<?php if (array_search("costing_invoice", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
-					<div class="col-md-2 col-xs-6 ">
+					<!-- <div class="col-md-2 col-xs-6 ">
 						<div class="col-md-12 section20">
 							<a href="<?php echo base_url(); ?>costing_invoice">
 								<div class="logo">
@@ -535,7 +535,7 @@ if ($module == 'dashboard' or $module == '') { ?>
 								</div>
 							</a>
 						</div>
-					</div>
+					</div> -->
 				<?php endif; ?>
 			
 			</div>
