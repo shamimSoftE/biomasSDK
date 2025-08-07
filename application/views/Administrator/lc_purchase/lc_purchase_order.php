@@ -618,27 +618,17 @@
 				.then(res => {
 					let accounts = res.data;
 					this.banks = accounts.map(account => {
-                    	account.display_name = `${account.account_name} - ${account.account_number} (${account.bank_name})`;
-                    return account;
-                })
+						account.display_name = `${account.account_name} - ${account.account_number} (${account.bank_name})`;
+						return account;
+					})
 				})
             },
 
 			getPurchases() {
-                // const excludedIds = this.lc_numbers.map(item => item.purchase_id);
-                axios.get('/get_purchases').then(res => {
-                    this.purchases = res.data.purchases.filter(p => p.status == 'p');
-                    // const filteredPurchases = purchases.filter(
-                    //     purchase => !excludedIds.includes(purchase.PurchaseMaster_SlNo)
-                    // );
-                    // this.purchases = filteredPurchases;
+                axios.post('/get_purchases',{forLC: true}).then(res => {
+                    this.purchases = res.data.purchases.filter(p => p.lc_created == 0);
                 })
             },
-
-			//productValueTotal() {
-            //   let totalAmountValue = (parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.perForeignAmount)).toFixed(2);
-            //   this.selectedProduct.totalForeignAmount = parseFloat(totalAmountValue).toFixed(2);
-            // },
 
 			async onChangePurchase() {
                 if(this.selectedPurchase != null) {

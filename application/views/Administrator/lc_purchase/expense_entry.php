@@ -201,7 +201,8 @@
 			},
 
 			getLCPurchase() {
-				axios.get('/get_lc_purchase_record').then(res => {
+				// axios.get('/get_lc_purchase_record').then(res => {
+				axios.get('/get_pending_lc_purchase_record').then(res => {
 					this.lcPurchases = res.data;
 				})
 			},
@@ -296,13 +297,13 @@
 			},
 
 			resetForm() {
-				this.lcInfo = {
-					id: 0,
-					lc_purchase_id: null,
-					exp_id: null,
-					amount: 0,
-				};
-				this.selectedLCPurchase = null;
+				// this.lcInfo = {
+				// 	id: 0,
+				// 	lc_purchase_id: null,
+				// 	exp_id: null,
+				// 	amount: 0,
+				// };
+				// this.selectedLCPurchase = null;
 				this.selectedExpense = null;
 				this.exp_amount = 0;
 			}

@@ -89,6 +89,11 @@ class Purchase extends CI_Controller
         if (isset($data->name) && $data->name != '') {
             $clauses .= " or pm.PurchaseMaster_InvoiceNo like '$data->name%'";
         }
+
+        if (isset($data->forLC) && $data->forLC != '') {
+            $clauses .= " and pm.is_lc_purchase  = 1";
+        }
+
         if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
             $clauses .= " and pm.PurchaseMaster_OrderDate between '$data->dateFrom' and '$data->dateTo'";
         }

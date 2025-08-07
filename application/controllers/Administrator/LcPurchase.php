@@ -417,26 +417,26 @@ class LcPurchase extends CI_Controller
                 exit;
             }
 
-            /*Get Purchase Details Data*/
-            // $purchaseDetails = $this->db->select('Product_IDNo,PurchaseDetails_TotalQuantity,PurchaseDetails_TotalAmount')->where('PurchaseMaster_IDNo', $data->lcPurchaseId)->get('tbl_lcpurchasedetails')->result();
-            // foreach ($purchaseDetails as $product) {
-            //     $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->Product_IDNo, $this->session->userdata('BRANCHid')])->num_rows();
-            //         if ($inventoryCount == 0) {
-            //             $inventory = array(
-            //                 'product_id'           => $product->Product_IDNo,
-            //                 'lc_purchase_quantity' => $product->PurchaseDetails_TotalQuantity,
-            //                 'branch_id'            => $this->session->userdata('BRANCHid')
-            //             );
-            //             $this->db->insert('tbl_currentinventory', $inventory);
-            //         } else {
-            //             $this->db->query("
-            //                 update tbl_currentinventory 
-            //                 set lc_purchase_quantity = lc_purchase_quantity + ? 
-            //                 where product_id = ? 
-            //                 and branch_id = ?
-            //             ", [$product->PurchaseDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
-            //         }
-            // }
+            /*Get LC Purchase Details Data*/
+            $purchaseDetails = $this->db->select('Product_IDNo,PurchaseDetails_TotalQuantity,PurchaseDetails_TotalAmount')->where('PurchaseMaster_IDNo', $data->lcPurchaseId)->get('tbl_lcpurchasedetails')->result();
+            foreach ($purchaseDetails as $product) {
+                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->Product_IDNo, $this->session->userdata('BRANCHid')])->num_rows();
+                    if ($inventoryCount == 0) {
+                        $inventory = array(
+                            'product_id'           => $product->Product_IDNo,
+                            'lc_purchase_quantity' => $product->PurchaseDetails_TotalQuantity,
+                            'branch_id'            => $this->session->userdata('BRANCHid')
+                        );
+                        $this->db->insert('tbl_currentinventory', $inventory);
+                    } else {
+                        $this->db->query("
+                            update tbl_currentinventory 
+                            set lc_purchase_quantity = lc_purchase_quantity + ? 
+                            where product_id = ? 
+                            and branch_id = ?
+                        ", [$product->PurchaseDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
+                    }
+            }
             
             $this->db->query("
                 update tbl_lcpurchasemaster 
@@ -453,11 +453,12 @@ class LcPurchase extends CI_Controller
                 'last_update_ip' => get_client_ip(),
             );
             
-            /*Delete LC Details*/
-            // $this->db->set($purchase)->where('PurchaseMaster_IDNo', $data->lcPurchaseId)->update('tbl_lcpurchasedetails');
-            /*Delete LC Master Data*/
             $this->db->set($purchaseData)->where('lc_purchase_master_id', $data->lcPurchaseId)->update('tbl_lcpurchasemaster');
             $this->db->set($purchaseData)->where('lc_purchase_id', $data->lcPurchaseId)->update('tbl_lcpurchaseexpense');
+
+            // for purchase
+            $this->db->set($purchaseData)->where('PurchaseMaster_SlNo', $data->lcPurchaseId)->update('tbl_purchasemaster');
+            $this->db->set($purchaseData)->where('PurchaseMaster_IDNo', $data->lcPurchaseId)->update('tbl_purchasedetails');
 
             $res = ['success' => true, 'message' => 'Successfully Approved'];
         } catch (Exception $ex) {
@@ -489,7 +490,6 @@ class LcPurchase extends CI_Controller
                 'PurchaseMaster_InvoiceNo'      => $invoice,
                 'Supplier_SlNo'                 => $data->purchase->supplierId,
                 'purchase_id'                   => $data->purchase->PurchaseMaster_SlNo,
-                // 'purchase_id'                   => $data->purchase->lc_purchase_master_id,
                 'lc_no'                         => $data->purchase->lc_no,
                 'pi_no'                         => $data->purchase->pi_no,
                 'paid'                          => $data->purchase->paid,
@@ -514,24 +514,24 @@ class LcPurchase extends CI_Controller
                 'last_update_ip'                => get_client_ip(),
                 'branch_id'                     => $this->session->userdata('BRANCHid')
             );
+
             $this->db->insert('tbl_lcpurchasemaster', $purchase);
             $purchaseId = $this->db->insert_id();
 
-            $bankDetails = array(
+            $loanDetails = array(
                 'lc_id'            => $purchaseId,
-                'form_type'        => 'LC',
+                'transaction_type' => 'Payment',
                 'amount'           => $data->purchase->total,
                 'account_id'       => $data->purchase->account_id,
                 'transaction_date' => $data->purchase->purchaseDate,
-                'transaction_type' => 'withdraw',
-                'note'             => 'LC Payment By Bank',
+                'note'             => 'LC Payment By Loan Account',
                 'status'           => 1,
                 'AddBy'            => $this->session->userdata("userId"),
                 'AddTime'          => date('Y-m-d H:i:s'),
                 'last_update_ip'   => get_client_ip(),
                 'branch_id'        => $this->session->userdata('BRANCHid')
             );
-            $this->db->insert('tbl_bank_transactions', $bankDetails);
+            $this->db->insert('tbl_loan_transactions', $loanDetails);
             
             foreach ($data->cartProducts as $product) {
                 $purchaseDetails = array(
@@ -554,21 +554,13 @@ class LcPurchase extends CI_Controller
                 $this->db->insert('tbl_lcpurchasedetails', $purchaseDetails);
             }
 
-            // if($data->cartExp){
-            //     foreach ($data->cartExp as $cartexps) {
-            //         $expDetails = array(
-            //             'lc_purchase_id' => $purchaseId,
-            //             'exp_id'         => $cartexps->expId,
-            //             'amount'         => $cartexps->total,
-            //             'status'         => 'p',
-            //             'AddBy'          => $this->session->userdata("userId"),
-            //             'AddTime'        => date('Y-m-d H:i:s'),
-            //             'last_update_ip' => get_client_ip(),
-            //             'branch_id'      => $this->session->userdata('BRANCHid')
-            //         );
-            //         $this->db->insert('tbl_lcpurchaseexpense', $expDetails);
-            //     }
-            // }
+            // update lc puchase is created.
+            $this->db->query("
+                update tbl_purchasemaster 
+                set lc_created = ? 
+                where PurchaseMaster_SlNo = ?
+                and branch_id = ?
+            ", [1, $data->purchase->PurchaseMaster_SlNo, $this->session->userdata('BRANCHid')]);
 
             $this->db->trans_commit();
             $res = ['success' => true, 'message' => 'LC Added Success', 'purchaseId' => $purchaseId];
@@ -586,8 +578,6 @@ class LcPurchase extends CI_Controller
             $this->db->trans_begin();
 
             $data = json_decode($this->input->raw_input_stream);
-            // echo json_encode($data);
-            // exit;
 
             $purchaseId = $data->purchase->purchaseId;
 
@@ -633,7 +623,6 @@ class LcPurchase extends CI_Controller
                     'currency_name'                 => $product->currencyName,
                     'currency_value'                => $product->totalForeignAmount,
                     'currency_rate'                 => $product->ProductCurrencyRate,
-                    // 'status'                        => 'p',
                     'AddBy'                         => $this->session->userdata("userId"),
                     'AddTime'                       => date('Y-m-d H:i:s'),
                     'last_update_ip'                => get_client_ip(),
@@ -642,23 +631,21 @@ class LcPurchase extends CI_Controller
                 $this->db->insert('tbl_lcpurchasedetails', $purchaseDetails);
             }
 
-            $bankDetails = array(
+            $loanDetails = array(
+                'transaction_type' => 'Payment',
                 'amount'           => $data->purchase->total,
                 'account_id'       => $data->purchase->account_id,
                 'transaction_date' => $data->purchase->purchaseDate,
-                'transaction_type' => 'withdraw',
-                'note'             => 'LC Payment By Bank',
+                'note'             => 'LC Payment By Loan Account',
                 'UpdateBy'         => $this->session->userdata("userId"),
                 'UpdateTime'       => date('Y-m-d H:i:s'),
                 'last_update_ip'   => get_client_ip(),
                 'branch_id'        => $this->session->userdata('BRANCHid')
             );
-
             $this->db->where('lc_id', $purchaseId);
-            $this->db->update('tbl_bank_transactions', $bankDetails);
+            $this->db->update('tbl_loan_transactions', $loanDetails);
 
-            $this->db->query("delete from tbl_lcpurchaseexpense where lc_purchase_id = ?", $purchaseId);
-
+            // $this->db->query("delete from tbl_lcpurchaseexpense where lc_purchase_id = ?", $purchaseId);
             // if($data->cartExp) {  
             //     foreach ($data->cartExp as $cartexps) {
             //         $expDetails = array(
@@ -684,7 +671,7 @@ class LcPurchase extends CI_Controller
         echo json_encode($res);
     }
 
-    public function lc_purchase_record()
+    public function lcPurchaseRecord()
     {
         $access = $this->mt->userAccess();
         if (!$access) {
@@ -909,8 +896,12 @@ class LcPurchase extends CI_Controller
                 and branch_id = ?
             ", [$data->product_coast, $data->Product_SlNo, $this->session->userdata('BRANCHid')]);
 
-            // $this->db->query("
-            // ")
+            $this->db->query("
+                update tbl_lcpurchasemaster
+                set costing_status = ?
+                where lc_purchase_master_id = ?
+                and branch_id = ?
+            ", [1, $data->Lcc_SlNo, $this->session->userdata('BRANCHid')]);
 
             // update lc details
             $this->db->query("
@@ -1374,7 +1365,7 @@ class LcPurchase extends CI_Controller
         $this->load->view('Administrator/index', $data);
     }
 
-    public function getLCPurchaseExpanses(){
+    public function getLCPurchaseExpanses() {
         $branchId = $this->session->userdata('BRANCHid');
         $query = $this->db->query("
                 select 

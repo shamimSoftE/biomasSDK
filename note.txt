@@ -9,8 +9,6 @@ ALTER TABLE `tbl_cbm_costing` ADD `expense_coast` DECIMAL(18,2) NOT NULL DEFAULT
 ============================ 03 August 2025 ========================
 ALTER TABLE `tbl_lcpurchasemaster` ADD `costing_status` INT NULL DEFAULT '0' COMMENT '0 = note yet cost add.' AFTER `paid`;
 
-
-
-
-
+================= 7 August 2025=================
+ALTER TABLE `tbl_purchasemaster` ADD `lc_created` TINYINT NOT NULL DEFAULT '0' COMMENT '1 for created' AFTER `is_lc_purchase`;
 

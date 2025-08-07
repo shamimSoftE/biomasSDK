@@ -322,7 +322,7 @@
             productOnChange() {
                 this.costing.Quantity = this.selectedProduct.PurchaseDetails_TotalQuantity;
                 this.costing.product_value = this.selectedProduct.PurchaseDetails_Rate;
-                this.costing.product_coast = parseFloat((this.costing.product_value * this.costing.expense_coast) / this.costing.Quantity).toFixed(2);
+                this.costing.product_coast = parseFloat((this.costing.product_value * this.costing.expense_coast) / this.costing.Quantity).toFixed(6);
                 
             },
 
